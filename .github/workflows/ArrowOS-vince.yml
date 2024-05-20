@@ -1,9 +1,8 @@
 name: Compile ArrowOS
 
 on:
-  push:
-    branches:
-      - 'main' # 触发编译的分支，根据你的需要修改
+  repository_dispatch:
+  workflow_dispatch:
   
 
 jobs:
