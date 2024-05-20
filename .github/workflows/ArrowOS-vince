@@ -1,0 +1,48 @@
+name: Compile ArrowOS
+
+on:
+  push:
+    branches:
+      - 'main' # 触发编译的分支，根据你的需要修改
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04 # 使用最新版本的Ubuntu作为运行环境
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive # 确保递归克隆所有子模块
+
+    - name: Setup environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-8-jdk ninja-build ccache git-lfs python3-pip
+        pip3 install --upgrade meson
+        pip3 install --upgrade ninja
+
+    - name: Setup Repo
+      run: |
+        mkdir -p $HOME/bin
+        curl -Lo $HOME/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
+        chmod a+x $HOME/bin/repo
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+    - name: Initialize Repo and Sync
+      run: |
+        repo init -u https://github.com/ArrowOS/android.git -b arrow-11.0
+        repo sync -c -j$(nproc)
+
+    - name: Build ArrowOS
+      run: |
+        source build/envsetup.sh
+        lunch arros_vince-userdebug
+        mka bacon
+
+    - name: Upload artifacts
+      if: success() # 只有当编译成功时上传制品
+      uses: actions/upload-artifact@v2
+      with:
+        name: arrowos-build
+        path: out/target/product/vince/*.zip
