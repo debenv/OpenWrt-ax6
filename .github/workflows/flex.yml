@@ -17,9 +17,9 @@ jobs:
     - name: Setup environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y git python3-pip
-        pip3 install --upgrade meson
-        pip3 install --upgrade ninja
+        sudo apt-get install -y git python3-pip docker-ce
+        # pip3 install --upgrade meson
+        # pip3 install --upgrade ninja
 
     # - name: Setup Repo
     #   run: |
@@ -36,7 +36,10 @@ jobs:
       run: |
         cd flexbuild
         . setup.env
-        bld -m ls1043ardb
+        bld docker
+        . setup.env
+        bld rfs -r debian:base
+        # bld -m ls1043ardb
 
     - name: Upload artifacts
       if: success() # 只有当编译成功时上传制品
