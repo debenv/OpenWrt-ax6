@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # 使用最新版本的Ubuntu作为运行环境
+    runs-on: ubuntu-latest # 使用最新版本的Ubuntu作为运行环境
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
     - name: Setup environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y openjdk-11-jdk ninja-build ccache git-lfs python3-pip
+        sudo apt-get install -y git python3-pip
         pip3 install --upgrade meson
         pip3 install --upgrade ninja
 
@@ -35,7 +35,7 @@ jobs:
     - name: Build flexbuild
       run: |
         cd flexbuild
-        source setup.env
+        . setup.env
         bld -m ls1043ardb
 
     - name: Upload artifacts
