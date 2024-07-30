@@ -31,10 +31,10 @@ jobs:
     - name: Initialize flexbuild
       run: |
         git clone https://github.com/NXP/flexbuild.git --depth=1
-        cd flexbuild/
 
     - name: Build flexbuild
       run: |
+        cd flexbuild
         source setup.env
         bld -m ls1043ardb
 
