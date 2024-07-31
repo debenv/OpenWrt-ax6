@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest # 使用最新版本的Ubuntu作为运行环境
+    runs-on: ubuntu-22.04 # 使用最新版本的Ubuntu作为运行环境
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
     - name: Setup environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y git python3-pip docker-ce
+        sudo apt-get install -y git python3-pip
         # pip3 install --upgrade meson
         # pip3 install --upgrade ninja
 
@@ -30,16 +30,14 @@ jobs:
 
     - name: Initialize flexbuild
       run: |
-        git clone https://github.com/NXP/flexbuild.git --depth=1
+        git clone https://github.com/debenv/mubuntu.git --depth=1
 
     - name: Build flexbuild
       run: |
-        cd flexbuild
-        . setup.env
-        bld docker
-        . setup.env
-        bld rfs -r debian:base
-        # bld -m ls1043ardb
+        cd mubuntu
+        source setup.env
+        flex-builder -i mkrfs -r ubuntu:lite
+        
 
     - name: Upload artifacts
       if: success() # 只有当编译成功时上传制品
