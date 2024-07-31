@@ -44,4 +44,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: flexbuild-build
-        path: build/rfs/*.tar.gz
+        path: build/images/*.tgz
+        # path: build/rfs/*.tar.gz
