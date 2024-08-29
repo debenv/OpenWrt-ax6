@@ -1,0 +1,56 @@
+name: Compile Frr
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04 # 使用最新版本的Ubuntu作为运行环境
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive # 确保递归克隆所有子模块
+
+    - name: Setup environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install git autoconf automake libtool make libreadline-dev texinfo \
+            pkg-config libpam0g-dev libjson-c-dev bison flex libc-ares-dev python3-dev python3-sphinx \
+            install-info build-essential libsnmp-dev perl libcap-dev protobuf-c-compiler libprotobuf-c-dev \
+            libelf-dev libunwind-dev gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libattr1-dev
+
+    - name: Setup json-c
+      run: |
+        export HOST_ARCH=aarch64-linux-gnu
+        git clone https://gitee.com/zcteo/json-c.git -b json-c-0.17-20230812 --depth=1
+        cd json-c
+        mkdir build
+        cd build
+        CC=${HOST_ARCH}-gcc \
+        CXX=${HOST_ARCH}-g++ \
+        cmake \
+        --install-prefix /usr/${HOST_ARCH} \
+        ..
+        make
+        make install
+
+    - name: Initialize Repo and Sync
+      run: |
+        repo init -u https://github.com/ArrowOS/android_manifest.git -b arrow-11.0 --depth=1
+        repo sync -c -j$(nproc)
+
+    - name: Build ArrowOS
+      run: |
+        source build/envsetup.sh
+        lunch arros_vince-userdebug
+        mka bacon
+
+    - name: Upload artifacts
+      if: success() # 只有当编译成功时上传制品
+      uses: actions/upload-artifact@v2
+      with:
+        name: arrowos-build
+        path: out/target/product/vince/*.zip
